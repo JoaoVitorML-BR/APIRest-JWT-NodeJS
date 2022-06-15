@@ -51,7 +51,7 @@ app.post('/users', auth, (req, res)=>{
 // router getting games. OK
 app.get('/games', auth, (req, res)=>{
    Games.findAll()
-      .then(games => res.json(req.auth.loggeduser, games))
+      .then(games => res.json(games))
          .catch(err => {
             res.sendStatus(500);
             console.log(err);
