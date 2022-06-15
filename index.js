@@ -5,9 +5,9 @@ const Users = require('./database/models/Users');
 const Games = require("./database/models/Games"); 
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const auth = require('./adminAuth/adminAuth');
+const auth = require('./middlewares/adminAuth');
 
-const jwtSecret = "SaToppa@*k*";
+const jwtSecret = "SaToppa@*k*ajgfkjaskflsldjkls";
 
 
 app.use(cors());
@@ -16,13 +16,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
  
 connection.authenticate().catch(err => console.log(err));
- 
 // route that game list. OK
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
 // router getting users. OK
-app.get('/users', (req, res) => {
+app.get('/users', auth, (req, res) => {
    Users.findAll()
    .then(users => res.json(users))
    .catch(e => {
@@ -32,7 +31,7 @@ app.get('/users', (req, res) => {
 });
 
 // router to create a user. OK
-app.post('/users', (req, res)=>{
+app.post('/users', auth, (req, res)=>{
    let {name, email, password} = req.body;
  
    if(name == undefined || email == undefined || password == undefined){
@@ -52,7 +51,7 @@ app.post('/users', (req, res)=>{
 // router getting games. OK
 app.get('/games', auth, (req, res)=>{
    Games.findAll()
-      .then(games => res.json(games))
+      .then(games => res.json(req.auth.loggeduser, games))
          .catch(err => {
             res.sendStatus(500);
             console.log(err);
@@ -60,7 +59,7 @@ app.get('/games', auth, (req, res)=>{
 });
  
 // router to getting a game with your id. OK
-app.get('/game/:id', (req, res)=>{
+app.get('/game/:id', auth, (req, res)=>{
  
    if(isNaN(req.params.id)){
       res.sendStatus(400);
@@ -86,7 +85,7 @@ app.get('/game/:id', (req, res)=>{
 });
  
 // router to create a game. OK
-app.post('/game', (req, res)=>{
+app.post('/game', auth, (req, res)=>{
    let {title, year, price} = req.body;
  
    if(title == undefined || year == undefined || price == undefined){
@@ -103,7 +102,7 @@ app.post('/game', (req, res)=>{
 });
  
 // router to update a game with your id. OK
-app.put('/game/:id', (req, res)=>{
+app.put('/game/:id', auth, (req, res)=>{
    let {title, year, price} = req.body;
    
    if(isNaN(req.params.id)){
@@ -139,7 +138,7 @@ app.put('/game/:id', (req, res)=>{
 });
  
 // router to delete a game with your id. OK
-app.delete('/game/:id', (req, res)=>{
+app.delete('/game/:id', auth, (req, res)=>{
    if(isNaN(req.params.id)){
       res.sendStatus(400);
    }
@@ -164,7 +163,7 @@ app.delete('/game/:id', (req, res)=>{
 });
 
 // authentication of email and password
-app.post('/auth', (req, res) => {
+app.post('/auth', auth, (req, res) => {
    var users = {email, password} = req.body;
    console.log(users)
 
@@ -181,7 +180,7 @@ app.post('/auth', (req, res) => {
                      res.json({err: "falha interna, entre em contato com o seu ADM"});
                   }else{
                      res.status(200);
-                     res.json({token: "12tb"})
+                     res.json({token: token});
                   }
                });
             }else{
@@ -202,3 +201,5 @@ app.post('/auth', (req, res) => {
 app.listen(4567, () => {
     console.log("Conectado ao servidor: http://localhost:4567");
 });
+
+module.exports = jwtSecret;
