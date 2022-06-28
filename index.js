@@ -46,8 +46,25 @@ app.post('/users', (req, res) => {
 
 // router getting games. OK
 app.get('/games', auth, (req, res) => {
+
+  var HATEOAS = [
+    {
+      href: "http://localhost:4567/game/2",
+      method: "PUT",
+      rel: "att_game"
+    },{
+      href: "http://localhost:4567/game/2",
+      method: "GET",
+      rel: "get_game"
+    },{
+      href: "http://localhost:4567/auth",
+      method: "POST",
+      rel: "login"
+    }
+  ]
+
   Games.findAll()
-    .then(games => res.json(games))
+    .then(games => res.json({games, _links: HATEOAS}))
     .catch(err => {
       res.sendStatus(500)
       console.log(err)
@@ -60,12 +77,29 @@ app.get('/game/:id', auth, (req, res) => {
     res.sendStatus(400)
   } else {
     let { id } = req.params
+
+    var HATEOAS = [
+      {
+        href: "http://localhost:4567/game/"+id,
+        method: "PUT",
+        rel: "att_game"
+      },{
+        href: "http://localhost:4567/game/"+id,
+        method: "GET",
+        rel: "get_game"
+      },{
+        href: "http://localhost:4567/games",
+        method: "GET",
+        rel: "get_all_games"
+      }
+    ]
+
     Games.findOne({ where: { id: id } })
       .then(game => {
         if (game == null) {
           res.sendStatus(404)
         } else {
-          res.json(game)
+          res.json({game, _links: HATEOAS})
         }
       })
       .catch(err => {
