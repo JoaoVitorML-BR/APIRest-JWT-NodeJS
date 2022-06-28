@@ -30,7 +30,7 @@ app.get('/users', auth, (req, res) => {
 })
 
 // router to create a user. OK
-app.post('/users', auth, (req, res) => {
+app.post('/users', (req, res) => {
   let { name, email, password } = req.body
 
   if (name == undefined || email == undefined || password == undefined) {
